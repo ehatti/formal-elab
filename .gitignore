@@ -2,3 +2,9 @@ notes.md
 .Makefile.d
 Makefile
 Makefile.conf
+
+*.aux
+*.glob
+*.vo
+*.vok
+*.vos
