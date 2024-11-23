@@ -1,15 +1,17 @@
-Record raw_elaborator {V C : Type}
+Record elab {V C : Type}
+  {JV : V -> Type}
 := {
-  fwd : V -> C;
-  bwd : C -> V;
+  elab_fwd : forall v, JV v -> C;
+  elab_bwd : C -> V;
 }.
-Arguments raw_elaborator : clear implicits.
+Arguments elab {V} C JV.
 
-Record is_elaborator {V C : Type}
-  (VJ : V -> Prop)
-  (CJ : C -> Prop)
-  (elab : raw_elaborator V C)
+Record correct {V C : Type}
+  {JV : V -> Prop}
+  {JC : C -> Prop}
+  {m : elab C JV}
 := {
-  correct  : forall e, VJ e -> CJ (elab.(fwd) e);
-  faithful : forall e, VJ e -> VJ (elab.(bwd) (elab.(fwd) e))
+  preserve : forall v p, JC (m.(elab_fwd) v p);
+  faithful : forall v p, JV (m.(elab_bwd) (m.(elab_fwd) v p))
 }.
+Arguments correct {V C} JV JC m.

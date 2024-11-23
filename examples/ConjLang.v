@@ -6,27 +6,27 @@ Definition C := list bool.
 Require Import Coq.Lists.List.
 Import ListNotations.
 
-Fixpoint fwdV (v : V) : C :=
+Fixpoint fwd (v : V) : C :=
   match v with
-  | VA l r => fwdV l ++ fwdV r
+  | VA l r => fwd l ++ fwd r
   | VB b => [b]
   end.
 
-Fixpoint bwdC (c : C) : V :=
+Fixpoint bwd (c : C) : V :=
   match c with
   | [] => VB false
   | [b] => VB b
-  | b :: c => VA (VB b) (bwdC c)
+  | b :: c => VA (VB b) (bwd c)
   end.
-
-Definition elab := {|
-  fwd := fwdV;
-  bwd := bwdC
-|}.
 
 Inductive JV : V -> Prop :=
 | JVA l r : JV l -> JV r -> JV (VA l r)
 | JVB : JV (VB true).
+
+Definition conj_elab : elab C JV := {|
+  elab_fwd v _ := fwd v;
+  elab_bwd := bwd
+|}.
 
 Inductive CJ : C -> Prop :=
 | JCS : CJ [true]
@@ -40,7 +40,7 @@ Proof.
 Qed.
 
 Lemma VJ_flat :
-  forall c, CJ c -> JV (bwdC c).
+  forall c, CJ c -> JV (bwd c).
 Proof.
   intros. induction H.
   { constructor. }
@@ -59,7 +59,7 @@ Proof.
 Qed.
 
 Lemma elab_correct :
-  forall e, JV e -> CJ (fwdV e).
+  forall e, JV e -> CJ (fwd e).
 Proof.
   intros.
   induction H.
@@ -68,13 +68,13 @@ Proof.
 Qed.
 
 Lemma elab_faithful :
-  forall e, JV e -> JV (bwdC (fwdV e)).
+  forall e, JV e -> JV (bwd (fwd e)).
 Proof.
   intros.
   now apply VJ_flat, elab_correct.
 Qed.
 
-Theorem elab_is_elaborator : is_elaborator JV CJ elab.
+Theorem elab_conj_correct : correct JV CJ conj_elab.
 Proof.
   constructor.
   { apply elab_correct. }
