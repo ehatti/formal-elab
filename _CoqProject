@@ -1,5 +1,5 @@
 -R src src
 -R examples examples
 
-src/Elaborator.v
+src/Elaboration.v
 examples/ConjLang.v
